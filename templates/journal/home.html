@@ -1,0 +1,14 @@
+{% extends "journal/base.html" %}
+{% block content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to Journal AI!</h1>
+        <p class="lead">A place to write, reflect, and polish your daily thoughts.</p>
+        <hr class="my-4">
+        <p>Start journaling today and let AI help you refine your thoughts.</p>
+        {% if user.is_authenticated %}
+            <a class="btn btn-primary btn-lg" href="{% url 'journal-create' %}" role="button">Start Writing</a>
+        {% else %}
+            <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Get Started</a>
+        {% endif %}
+    </div>
+{% endblock content %} 

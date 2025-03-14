@@ -1,0 +1,17 @@
+h1 {
+    font-size: 2rem; /* Larger heading for polished journal */
+}
+
+.list-group-item {
+    display: flex; /* Flexbox for list items */
+    justify-content: space-between; /* Space between title and date */
+}
+
+.list-group-item a {
+    text-decoration: none; /* Remove underline from links */
+    color: #007bff; /* Primary color for links */
+}
+
+.list-group-item a:hover {
+    text-decoration: underline; /* Underline on hover */
+} 

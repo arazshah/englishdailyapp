@@ -1,0 +1,20 @@
+{% extends "journal/base.html" %}
+{% block content %}
+    <h1 class="mb-3">My Journal Entries</h1>
+    {% if entries %}
+        {% for entry in entries %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <small class="text-muted">{{ entry.date_posted|date:"F d, Y" }}</small>
+                    </div>
+                    <h2><a class="article-title" href="{% url 'journal-detail' entry.id %}">{{ entry.title }}</a></h2>
+                    <p class="article-content">{{ entry.content|truncatewords:50 }}</p>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>You haven't created any journal entries yet.</p>
+        <a class="btn btn-primary" href="{% url 'journal-create' %}">Create Your First Entry</a>
+    {% endif %}
+{% endblock content %} 

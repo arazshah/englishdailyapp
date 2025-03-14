@@ -1,0 +1,51 @@
+{% extends "journal/base.html" %}
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'journal/css/journalentry_detail.css' %}">
+</head>
+{% block content %}
+    <style>
+        .article-title {
+            font-size: 1.5rem; /* Larger title font */
+            font-weight: bold; /* Bold title */
+        }
+
+        .article-content {
+            line-height: 1.6; /* Better line spacing for readability */
+        }
+
+        .btn {
+            margin-right: 5px; /* Space between buttons */
+        }
+    </style>
+    <article class="media content-section">
+        <div class="media-body">
+            <div class="article-metadata">
+                <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+                <div>
+                    <a class="btn btn-secondary" href="{% url 'journal-update' object.id %}"><i class="fas fa-edit"></i> Update</a>
+                    <a class="btn btn-danger" href="{% url 'journal-delete' object.id %}"><i class="fas fa-trash"></i> Delete</a>
+                </div>
+            </div>
+            <h2 class="article-title">{{ object.title }}</h2>
+            <p class="article-content">{{ object.content }}</p>
+            
+            {% if object.polished_content %}
+                <hr>
+                <h4>AI Polished Version:</h4>
+                <p class="article-content">{{ object.polished_content }}</p>
+            {% else %}
+                <hr>
+                <form method="POST" action="{% url 'journal-polish' object.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-magic"></i> Polish with AI</button>
+                </form>
+            {% endif %}
+            <hr>
+            <form method="POST" action="{% url 'preview-polished-entry' object.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-info"><i class="fas fa-eye"></i> Preview Polished Version</button>
+            </form>
+        </div>
+    </article>
+{% endblock content %} 

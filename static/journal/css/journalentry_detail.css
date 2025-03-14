@@ -1,0 +1,12 @@
+.article-title {
+    font-size: 1.5rem; /* Larger title font */
+    font-weight: bold; /* Bold title */
+}
+
+.article-content {
+    line-height: 1.6; /* Better line spacing for readability */
+}
+
+.btn {
+    margin-right: 5px; /* Space between buttons */
+} 

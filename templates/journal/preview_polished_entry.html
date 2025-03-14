@@ -1,0 +1,16 @@
+{% extends "journal/base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Polished Journal Entry</h2>
+        <p><strong>Polished Content:</strong></p>
+        <p>{{ polished_content }}</p>
+        <p><strong>Detected Topic:</strong> {{ topic }}</p>
+        
+        <form method="POST" action="{% url 'journal-detail' entry.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="polished_content" value="{{ polished_content }}">
+            <button type="submit" class="btn btn-success">Accept and Save</button>
+        </form>
+        <a href="{% url 'journal-detail' entry.id %}" class="btn btn-secondary">Cancel</a>
+    </div>
+{% endblock content %} 

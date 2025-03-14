@@ -1,0 +1,32 @@
+body {
+    background-color: yellow; /* Test background color */
+    color: #333; /* Dark text color */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean font */
+}
+
+h1, h2, h3, h4 {
+    color: #007bff; /* Primary color for headings */
+    font-weight: bold; /* Make headings bold */
+}
+
+p {
+    line-height: 1.6; /* Better line spacing for readability */
+    margin-bottom: 15px; /* Space below paragraphs */
+}
+
+.content-section {
+    padding: 20px; /* Padding for content */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* More specific selectors */
+.container h1, .container h2, .container h3, .container h4 {
+    color: #007bff; /* Primary color for headings */
+    font-weight: bold; /* Make headings bold */
+}
+
+.container p {
+    line-height: 1.6; /* Better line spacing for readability */
+    margin-bottom: 15px; /* Space below paragraphs */
+} 

@@ -1,0 +1,30 @@
+{% extends "journal/base.html" %} {% load static %} {% block content %}
+<div class="container mt-4">
+  <h1>Create a New Journal Entry</h1>
+  <form method="POST" action="{% url 'journal-create' %}">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input
+        type="text"
+        class="form-control"
+        id="title"
+        name="title"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="content">Content</label>
+      <textarea
+        class="form-control"
+        id="content"
+        name="content"
+        rows="5"
+        required
+      ></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{% url 'journal-entries' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock content %}

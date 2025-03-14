@@ -1,0 +1,28 @@
+body {
+    background-color: #f8f9fa; /* Light background for better contrast */
+    color: #343a40; /* Dark text color */
+    font-family: 'Arial', sans-serif; /* Clean font */
+}
+
+h1, h2, h3, h4 {
+    color: #007bff; /* Primary color for headings */
+}
+
+.navbar {
+    margin-bottom: 20px; /* Space below the navbar */
+}
+
+.content-section {
+    background: #ffffff; /* White background for content sections */
+    padding: 20px; /* Padding for content */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.list-group-item {
+    border: none; /* Remove borders for list items */
+}
+
+.alert {
+    margin-top: 20px; /* Space above alerts */
+} 

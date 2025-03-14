@@ -1,0 +1,39 @@
+{% extends "journal/base.html" %}
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'journal/css/my_polished_journal.css' %}">
+</head>
+{% block content %}
+    <style>
+        h1 {
+            font-size: 2rem; /* Larger heading for polished journal */
+        }
+
+        .list-group-item {
+            display: flex; /* Flexbox for list items */
+            justify-content: space-between; /* Space between title and date */
+        }
+
+        .list-group-item a {
+            text-decoration: none; /* Remove underline from links */
+            color: #007bff; /* Primary color for links */
+        }
+
+        .list-group-item a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+    </style>
+    <h1>My Polished Journal</h1>
+    {% if polished_entries %}
+        <ul class="list-group">
+            {% for entry in polished_entries %}
+                <li class="list-group-item">
+                    <a href="{% url 'journal-detail' entry.id %}">{{ entry.title }}</a>
+                    <small class="text-muted">{{ entry.date_posted|date:"F d, Y" }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no polished journal entries yet.</p>
+    {% endif %}
+{% endblock content %} 
