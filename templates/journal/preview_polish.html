@@ -1,0 +1,115 @@
+{% extends "journal/base.html" %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'journal/css/preview_polish.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <!-- Page Header -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Preview Polished Entry</h1>
+    <a href="{% url 'journal-detail' entry.id %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+      <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Back to Entry
+    </a>
+  </div>
+
+  <div class="preview-container">
+    <!-- Original Content Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="font-weight-bold">Original Entry</h5>
+      </div>
+      <div class="card-body">
+        <div class="topic-badge mb-3">
+          <span class="badge badge-secondary">Original</span>
+        </div>
+        <div class="original-content">
+          {{ entry.content|linebreaks }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Polished Content Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="font-weight-bold">Polished Version</h5>
+      </div>
+      <div class="card-body">
+        <div class="topic-badge mb-3">
+          <span class="badge badge-primary">{{ topic }}</span>
+        </div>
+        <div class="polished-content">
+          {{ polished_content|linebreaks }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="font-weight-bold">Changes Made</h5>
+      </div>
+      <div class="card-body">
+        <div class="diff-container">
+          {{ diff_html|safe }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Evaluation Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="font-weight-bold">Writing Evaluation</h5>
+      </div>
+      <div class="card-body">
+        <div class="evaluation-content">
+          {{ evaluation|linebreaks }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Card -->
+    {% if metrics_data %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="font-weight-bold">Writing Metrics</h5>
+      </div>
+      <div class="card-body">
+        <div class="metrics-grid">
+          {% for key, value in metrics_data.items %}
+          <div class="metric-item">
+            <div class="metric-label">{{ key|title }}</div>
+            <div class="metric-value">
+              <div class="progress">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ value }}%;" 
+                     aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="100">{{ value }}%</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="{% url 'journal-detail' entry.id %}" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Cancel
+      </a>
+      <form method="POST" action="{% url 'journal-detail' entry.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="polished_content" value="{{ polished_content }}">
+        <input type="hidden" name="is_polished" value="True">
+        <input type="hidden" name="evaluation" value="{{ evaluation }}">
+        <input type="hidden" name="topic" value="{{ topic }}">
+        <input type="hidden" name="diff_html" value="{{ diff_html|escape }}">
+        <input type="hidden" name="metrics_data" value="{{ metrics_data|json_script:'metrics-data'|escapejs }}">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Save Polished Version
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %} 

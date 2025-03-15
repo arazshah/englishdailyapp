@@ -9,4 +9,143 @@
 
 .btn {
     margin-right: 5px; /* Space between buttons */
-} 
+}
+
+/* Add all the CSS for metrics, evaluation, etc. */
+.metrics-card {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.metrics-card h6 {
+    color: #007bff;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.metric-item {
+    margin-bottom: 10px;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 2px;
+}
+
+.metric-value {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.metric-arrow {
+    color: #6c757d;
+    margin: 0 5px;
+}
+
+.metric-change {
+    font-size: 0.8rem;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.metric-change.positive {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.metric-change.negative {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.metric-change.neutral {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* Evaluation styles */
+.evaluation-summary-card {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    height: 100%;
+}
+
+.evaluation-summary-card h6 {
+    color: #007bff;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.strength-list, .improvement-list {
+    padding-left: 20px;
+}
+
+.strength-list li, .improvement-list li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.strength-list li {
+    color: #155724;
+}
+
+.improvement-list li {
+    color: #721c24;
+}
+
+.example-comparison {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+    border-left: 4px solid #007bff;
+}
+
+.example-original {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.example-improved {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.evaluation-category {
+    margin-bottom: 30px;
+}
+
+.evaluation-category h4 {
+    color: #007bff;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.added {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 2px;
+}
+
+.removed {
+    background-color: #f8d7da;
+    color: #721c24;
+    text-decoration: line-through;
+    padding: 2px;
+}
+
+/* Add all the other CSS classes needed for the comparison and evaluation tabs */ 

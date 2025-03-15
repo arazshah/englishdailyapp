@@ -1,0 +1,27 @@
+.added {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 2px;
+}
+
+.removed {
+    background-color: #f8d7da;
+    color: #721c24;
+    text-decoration: line-through;
+    padding: 2px;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+}
+
+.nav-tabs {
+    margin-bottom: 0;
+}
+
+.card {
+    margin-bottom: 15px;
+} 

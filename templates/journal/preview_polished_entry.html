@@ -1,16 +1,466 @@
 {% extends "journal/base.html" %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'journal/css/preview_polish.css' %}">
+{% endblock %}
 {% block content %}
-    <div class="content-section">
-        <h2>Polished Journal Entry</h2>
-        <p><strong>Polished Content:</strong></p>
-        <p>{{ polished_content }}</p>
-        <p><strong>Detected Topic:</strong> {{ topic }}</p>
-        
-        <form method="POST" action="{% url 'journal-detail' entry.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="polished_content" value="{{ polished_content }}">
-            <button type="submit" class="btn btn-success">Accept and Save</button>
-        </form>
-        <a href="{% url 'journal-detail' entry.id %}" class="btn btn-secondary">Cancel</a>
+    <!-- Add this at the top of your template for debugging -->
+    {% if debug %}
+    <div class="alert alert-info">
+        <p>Debug Info:</p>
+        <ul>
+            <li>Entry ID: {{ entry.id }}</li>
+            <li>Has polished content: {{ polished_content|yesno:"Yes,No" }}</li>
+            <li>Has topic: {{ topic|yesno:"Yes,No" }}</li>
+            <li>Has evaluation: {{ evaluation|yesno:"Yes,No" }}</li>
+            <li>Has diff_html: {{ diff_html|yesno:"Yes,No" }}</li>
+        </ul>
     </div>
+    {% endif %}
+
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="card-title h4 mb-0 text-primary">Preview Polished Entry</h2>
+                            <div class="preview-actions">
+                                <a href="{% url 'journal-detail' entry.id %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a>
+                                <form method="POST" action="{% url 'preview-polished-entry' entry.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="save_polished" value="true">
+                                    <input type="hidden" name="polished_content" value="{{ polished_content }}">
+                                    <input type="hidden" name="topic" value="{{ topic }}">
+                                    <input type="hidden" name="evaluation" value="{{ evaluation }}">
+                                    <input type="hidden" name="diff_html" value="{{ diff_html|escapejs }}">
+                                    <input type="hidden" name="metrics_json" value="{{ metrics_json|escapejs }}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i> Save Changes
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <!-- Original Content -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h3 class="card-title h5 mb-0">Original Content</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="entry-title mb-3">{{ entry.title }}</h4>
+                        <div class="entry-content">
+                            <p>{{ entry.content }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <!-- Polished Content -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title h5 mb-0">Polished Content</h3>
+                            <span class="badge bg-primary"><i class="fas fa-tag me-1"></i> {{ topic }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="entry-title mb-3">{{ entry.title }}</h4>
+                        <div class="entry-content polished">
+                            <p>{{ polished_content }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <!-- Analysis Tabs -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <ul class="nav nav-tabs card-header-tabs" id="analysisTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="changes-tab" data-toggle="tab" href="#changes" role="tab">
+                                    <i class="fas fa-exchange-alt text-primary me-1"></i> Changes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="metrics-tab" data-toggle="tab" href="#metrics" role="tab">
+                                    <i class="fas fa-chart-bar text-success me-1"></i> Metrics
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="evaluation-tab" data-toggle="tab" href="#evaluation" role="tab">
+                                    <i class="fas fa-clipboard-check text-info me-1"></i> Evaluation
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="tab-content" id="analysisTabContent">
+                            <!-- Changes Tab -->
+                            <div class="tab-pane fade show active" id="changes" role="tabpanel">
+                                <div class="diff-container">
+                                    {{ diff_html|safe }}
+                                </div>
+                            </div>
+                            
+                            <!-- Metrics Tab -->
+                            <div class="tab-pane fade" id="metrics" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mb-4">
+                                        <div class="metric-card">
+                                            <h5 class="metric-title">Text Statistics</h5>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Word Count</span>
+                                                    <div class="metric-values">
+                                                        <span class="original">{{ metrics.text_statistics.original_words }}</span>
+                                                        <i class="fas fa-arrow-right mx-1"></i>
+                                                        <span class="polished">{{ metrics.text_statistics.polished_words }}</span>
+                                                        {% if metrics.text_statistics.word_count_diff > 0 %}
+                                                            <span class="change positive">(+{{ metrics.text_statistics.word_count_diff }})</span>
+                                                        {% elif metrics.text_statistics.word_count_diff < 0 %}
+                                                            <span class="change negative">({{ metrics.text_statistics.word_count_diff }})</span>
+                                                        {% else %}
+                                                            <span class="change neutral">(0)</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Sentence Count</span>
+                                                    <div class="metric-values">
+                                                        <span class="original">{{ metrics.text_statistics.original_sentences }}</span>
+                                                        <i class="fas fa-arrow-right mx-1"></i>
+                                                        <span class="polished">{{ metrics.text_statistics.polished_sentences }}</span>
+                                                        {% if metrics.text_statistics.sentence_count_diff > 0 %}
+                                                            <span class="change positive">(+{{ metrics.text_statistics.sentence_count_diff }})</span>
+                                                        {% elif metrics.text_statistics.sentence_count_diff < 0 %}
+                                                            <span class="change negative">({{ metrics.text_statistics.sentence_count_diff }})</span>
+                                                        {% else %}
+                                                            <span class="change neutral">(0)</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-4">
+                                        <div class="metric-card">
+                                            <h5 class="metric-title">Quality Metrics</h5>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Avg. Sentence Length</span>
+                                                    <div class="metric-values">
+                                                        <span class="original">{{ metrics.quality_metrics.avg_sentence_length_original }}</span>
+                                                        <i class="fas fa-arrow-right mx-1"></i>
+                                                        <span class="polished">{{ metrics.quality_metrics.avg_sentence_length_polished }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Vocabulary Richness</span>
+                                                    <div class="metric-values">
+                                                        <span class="original">{{ metrics.quality_metrics.vocabulary_richness_original }}%</span>
+                                                        <i class="fas fa-arrow-right mx-1"></i>
+                                                        <span class="polished">{{ metrics.quality_metrics.vocabulary_richness_polished }}%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-4">
+                                        <div class="metric-card">
+                                            <h5 class="metric-title">Change Analysis</h5>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Lines Changed</span>
+                                                    <div class="metric-values">
+                                                        <span class="added">+{{ metrics.change_analysis.added_lines }}</span>
+                                                        <span class="removed">-{{ metrics.change_analysis.removed_lines }}</span>
+                                                        <span class="unchanged">={{ metrics.change_analysis.unchanged_lines }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Overall Change</span>
+                                                    <span class="change-percentage">{{ metrics.change_analysis.change_percentage }}%</span>
+                                                </div>
+                                                <div class="progress mt-2" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ metrics.change_analysis.change_percentage }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Evaluation Tab -->
+                            <div class="tab-pane fade" id="evaluation" role="tabpanel">
+                                <div class="evaluation-content">
+                                    {{ evaluation|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .added {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 2px;
+        }
+        
+        .removed {
+            background-color: #f8d7da;
+            color: #721c24;
+            text-decoration: line-through;
+            padding: 2px;
+        }
+        
+        .card {
+            margin-bottom: 15px;
+        }
+        
+        /* New styles for evaluation section */
+        .evaluation-category {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .evaluation-category h4 {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .example-comparison {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .example-original {
+            color: #721c24;
+            font-style: italic;
+        }
+        
+        .example-improved {
+            color: #155724;
+            font-weight: 500;
+        }
+        
+        .accordion .card-header {
+            padding: 0;
+        }
+        
+        .accordion .btn-link {
+            color: #007bff;
+            text-decoration: none;
+            width: 100%;
+            text-align: left;
+            padding: 10px 15px;
+        }
+        
+        .accordion .btn-link:hover, .accordion .btn-link:focus {
+            text-decoration: none;
+        }
+        
+        /* Metrics styles */
+        .metrics-card {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metrics-card h6 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .metric-item {
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 2px;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .metric-arrow {
+            color: #6c757d;
+            margin: 0 5px;
+        }
+        
+        .metric-change {
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .metric-change.positive {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .metric-change.negative {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .metric-change.neutral {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .progress-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        
+        .progress-container {
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .progress-labels {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .change-details {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+        
+        /* Enhanced evaluation styles */
+        .evaluation-summary-card {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            height: 100%;
+        }
+        
+        .evaluation-summary-card h6 {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .strength-list, .improvement-list {
+            padding-left: 20px;
+        }
+        
+        .strength-list li, .improvement-list li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .strength-list li {
+            color: #155724;
+        }
+        
+        .improvement-list li {
+            color: #721c24;
+        }
+        
+        .example-comparison {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        
+        .example-original {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .example-improved {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .evaluation-category {
+            margin-bottom: 30px;
+        }
+        
+        .evaluation-category h4 {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .category-progress {
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+        
+        .category-progress .progress {
+            height: 8px;
+            margin-top: 5px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the tabs
+            $('#analysisTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
 {% endblock content %} 

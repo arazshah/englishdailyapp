@@ -1,51 +1,424 @@
-{% extends "journal/base.html" %}
-{% load static %}
-<head>
-    <link rel="stylesheet" type="text/css" href="{% static 'journal/css/journalentry_detail.css' %}">
-</head>
-{% block content %}
-    <style>
-        .article-title {
-            font-size: 1.5rem; /* Larger title font */
-            font-weight: bold; /* Bold title */
-        }
+{% extends "journal/base.html" %} {% load static %} {% block head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'journal/css/journalentry_detail.css' %}"
+/>
+{% endblock %} {% block content %}
+<div class="container-fluid px-4">
+  <!-- Page Header -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Journal Entry</h1>
+    <div>
+      <a href="{% url 'journal-home' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm mr-2">
+        <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Back to Entries
+      </a>
+      <a href="{% url 'export-pdf-entry' object.id %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-download fa-sm text-white-50 mr-1"></i> Export PDF
+      </a>
+    </div>
+  </div>
 
-        .article-content {
-            line-height: 1.6; /* Better line spacing for readability */
-        }
-
-        .btn {
-            margin-right: 5px; /* Space between buttons */
-        }
-    </style>
-    <article class="media content-section">
-        <div class="media-body">
-            <div class="article-metadata">
-                <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
-                <div>
-                    <a class="btn btn-secondary" href="{% url 'journal-update' object.id %}"><i class="fas fa-edit"></i> Update</a>
-                    <a class="btn btn-danger" href="{% url 'journal-delete' object.id %}"><i class="fas fa-trash"></i> Delete</a>
-                </div>
-            </div>
-            <h2 class="article-title">{{ object.title }}</h2>
-            <p class="article-content">{{ object.content }}</p>
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Main Content Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <h6 class="m-0 font-weight-bold text-primary">{{ object.title }}</h6>
+          
+          <!-- Action buttons -->
+          <div class="action-buttons">
+            <a class="btn btn-icon btn-light" href="{% url 'journal-update' object.id %}" title="Edit entry" aria-label="Edit entry">
+              <i class="fas fa-edit"></i>
+            </a>
             
-            {% if object.polished_content %}
-                <hr>
-                <h4>AI Polished Version:</h4>
-                <p class="article-content">{{ object.polished_content }}</p>
-            {% else %}
-                <hr>
-                <form method="POST" action="{% url 'journal-polish' object.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-magic"></i> Polish with AI</button>
-                </form>
-            {% endif %}
-            <hr>
-            <form method="POST" action="{% url 'preview-polished-entry' object.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-info"><i class="fas fa-eye"></i> Preview Polished Version</button>
+            <a class="btn btn-icon btn-light" href="{% url 'journal-delete' object.id %}" title="Delete entry" aria-label="Delete entry">
+              <i class="fas fa-trash"></i>
+            </a>
+            
+            {% if not object.is_polished %}
+            <form method="POST" action="{% url 'preview-polished-entry' object.id %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-icon btn-primary" title="Polish entry" aria-label="Polish entry">
+                <i class="fas fa-magic"></i>
+              </button>
             </form>
+            {% endif %}
+            
+            {% if object.markdown_path %}
+            <a href="{% url 'download-markdown' object.id %}" class="btn btn-icon btn-light" title="Download Markdown" aria-label="Download Markdown">
+              <i class="fas fa-download"></i>
+            </a>
+            {% endif %}
+            
+            {% if object.is_polished %}
+            <a href="{% url 'comprehensive-data' object.id %}" class="btn btn-icon btn-light" title="View all data" aria-label="View all data">
+              <i class="fas fa-chart-bar"></i>
+            </a>
+            
+            <a href="{% url 'download-json' object.id %}" class="btn btn-icon btn-light" title="Download JSON" aria-label="Download JSON">
+              <i class="fas fa-file-code"></i>
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'export-pdf-entry' object.id %}" class="btn btn-icon btn-light" title="Export to PDF" aria-label="Export to PDF">
+              <i class="fas fa-file-pdf"></i>
+            </a>
+          </div>
         </div>
-    </article>
-{% endblock content %} 
+        
+        <div class="card-body">
+          <div class="entry-metadata mb-3">
+            <span class="text-muted"><i class="far fa-calendar-alt me-1"></i> {{ object.date_posted|date:"F d, Y" }}</span>
+            {% if object.tags.all %}
+            <div class="mt-2">
+              {% for tag in object.tags.all %}
+              <span class="badge badge-info">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="entry-content">
+            {{ object.content|linebreaks }}
+          </div>
+        </div>
+      </div>
+      
+      {% if object.is_polished %}
+      <!-- Polished Content Section -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <h6 class="m-0 font-weight-bold text-success">
+            <i class="fas fa-magic mr-2"></i>Polished Version
+          </h6>
+          <div class="polish-metadata">
+            <span class="badge badge-light">
+              <i class="far fa-calendar-alt mr-1"></i>{{ object.polish_date|date:"F d, Y" }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Tabs for different views -->
+          <ul class="nav nav-tabs" id="entryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" id="polished-tab" data-toggle="tab" href="#polished" role="tab" aria-controls="polished" aria-selected="true">
+                <i class="fas fa-file-alt mr-1"></i>Polished Content
+              </a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="diff-tab" data-toggle="tab" href="#diff" role="tab" aria-controls="diff" aria-selected="false">
+                <i class="fas fa-exchange-alt mr-1"></i>Changes
+              </a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="evaluation-tab" data-toggle="tab" href="#evaluation" role="tab" aria-controls="evaluation" aria-selected="false">
+                <i class="fas fa-chart-line mr-1"></i>Evaluation
+              </a>
+            </li>
+          </ul>
+          
+          <!-- Tab content -->
+          <div class="tab-content mt-3" id="entryTabsContent">
+            <!-- Polished Content Tab -->
+            <div class="tab-pane fade show active" id="polished" role="tabpanel">
+              <div class="topic-badge mb-3">
+                <span class="badge badge-primary">{{ object.topic }}</span>
+              </div>
+              <div class="polished-content">
+                {{ object.polished_content|linebreaks }}
+              </div>
+            </div>
+            
+            <!-- Diff Tab -->
+            <div class="tab-pane fade" id="diff" role="tabpanel">
+              <div class="diff-container">
+                {{ object.diff_html|safe }}
+              </div>
+            </div>
+            
+            <!-- Evaluation Tab -->
+            <div class="tab-pane fade" id="evaluation" role="tabpanel">
+              <div class="evaluation-container">
+                <!-- Summary Card -->
+                <div class="evaluation-section evaluation-summary">
+                  <div class="evaluation-header">
+                    <h5><i class="fas fa-clipboard-check"></i>Evaluation Summary</h5>
+                  </div>
+                  <div class="evaluation-card">
+                    <div class="summary-grid">
+                      <div class="summary-item">
+                        <div class="summary-icon">
+                          <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="summary-content">
+                          <div class="summary-label">Topic</div>
+                          <div class="summary-value">{{ object.topic }}</div>
+                        </div>
+                      </div>
+                      
+                      {% if object.metrics_data %}
+                      <div class="summary-item">
+                        <div class="summary-icon">
+                          <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="summary-content">
+                          <div class="summary-label">Overall Quality</div>
+                          <div class="summary-value">
+                            {% with overall=object.metrics_data.overall|default:0 %}
+                            <div class="progress">
+                              <div class="progress-bar {% if overall >= 80 %}high{% elif overall >= 50 %}medium{% else %}low{% endif %}" 
+                                   role="progressbar" 
+                                   style="width: {{ overall }}%;" 
+                                   aria-valuenow="{{ overall }}" 
+                                   aria-valuemin="0" 
+                                   aria-valuemax="100">{{ overall }}%</div>
+                            </div>
+                            {% endwith %}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="summary-item">
+                        <div class="summary-icon">
+                          <i class="fas fa-magic"></i>
+                        </div>
+                        <div class="summary-content">
+                          <div class="summary-label">Improvement</div>
+                          <div class="summary-value">
+                            {% with improvement=object.metrics_data.improvement|default:0 %}
+                            <div class="progress">
+                              <div class="progress-bar {% if improvement >= 80 %}high{% elif improvement >= 50 %}medium{% else %}low{% endif %}" 
+                                   role="progressbar" 
+                                   style="width: {{ improvement }}%;" 
+                                   aria-valuenow="{{ improvement }}" 
+                                   aria-valuemin="0" 
+                                   aria-valuemax="100">{{ improvement }}%</div>
+                            </div>
+                            {% endwith %}
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+                      
+                      <div class="summary-item">
+                        <div class="summary-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                          <div class="summary-label">Polished On</div>
+                          <div class="summary-value">{{ object.polish_date|date:"F d, Y" }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Writing Evaluation Section -->
+                <div class="evaluation-section evaluation-analysis">
+                  <div class="evaluation-header">
+                    <h5><i class="fas fa-chart-line"></i>Writing Evaluation</h5>
+                    <button class="btn btn-sm btn-outline-primary print-evaluation" onclick="window.print()">
+                      <i class="fas fa-print mr-1"></i> Print Evaluation
+                    </button>
+                  </div>
+                  <div class="evaluation-card">
+                    {% if object.evaluation %}
+                      <div class="evaluation-content">
+                        {{ object.evaluation|linebreaks }}
+                      </div>
+                    {% else %}
+                      <p class="text-muted">No evaluation available for this entry.</p>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <!-- Metrics Section -->
+                <div class="evaluation-section evaluation-metrics">
+                  <div class="evaluation-header">
+                    <h5><i class="fas fa-chart-bar"></i>Writing Metrics</h5>
+                  </div>
+                  <div class="evaluation-card">
+                    {% if object.metrics_data %}
+                      <div class="metrics-grid">
+                        {% for key, value in object.metrics_data.items %}
+                          {% if key != 'overall' and key != 'improvement' %}
+                          <div class="metric-item">
+                            <div class="metric-label">{{ key|title }}</div>
+                            <div class="metric-value">
+                              <div class="progress">
+                                <div class="progress-bar {% if value >= 80 %}high{% elif value >= 50 %}medium{% else %}low{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ value }}%;" 
+                                     aria-valuenow="{{ value }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">{{ value }}%</div>
+                              </div>
+                            </div>
+                          </div>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <p class="text-muted">No metrics available for this entry.</p>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <!-- Comparison Section -->
+                <div class="evaluation-section evaluation-comparison">
+                  <div class="evaluation-header">
+                    <h5><i class="fas fa-exchange-alt"></i>Before & After Comparison</h5>
+                  </div>
+                  <div class="evaluation-card">
+                    {% if object.diff_html %}
+                      <div class="diff-container">
+                        {{ object.diff_html|safe }}
+                      </div>
+                      <div class="diff-legend mt-3">
+                        <div class="d-flex align-items-center mb-2">
+                          <span class="diff-added-sample mr-2">Added text</span>
+                          <small class="text-muted">- Text that was added during polishing</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                          <span class="diff-removed-sample mr-2">Removed text</span>
+                          <small class="text-muted">- Text that was removed during polishing</small>
+                        </div>
+                      </div>
+                    {% else %}
+                      <p class="text-muted">No comparison available for this entry.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Sidebar with related entries or stats -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Journal Stats</h6>
+        </div>
+        <div class="card-body">
+          <div class="stats-item mb-3">
+            <div class="d-flex justify-content-between">
+              <span>Total Entries</span>
+              <span class="badge badge-primary">{{ total_entries }}</span>
+            </div>
+          </div>
+          <div class="stats-item mb-3">
+            <div class="d-flex justify-content-between">
+              <span>Polished Entries</span>
+              <span class="badge badge-success">{{ polished_entries }}</span>
+            </div>
+          </div>
+          <div class="stats-item">
+            <div class="d-flex justify-content-between">
+              <span>This Month</span>
+              <span class="badge badge-info">{{ monthly_entries }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent entries -->
+      <div class="card shadow-sm">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Recent Entries</h6>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for entry in recent_entries %}
+          <a href="{% url 'journal-detail' entry.id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">{{ entry.title|truncatechars:25 }}</h6>
+              <small>{{ entry.date_posted|date:"M d" }}</small>
+            </div>
+            <p class="mb-1 text-truncate small">{{ entry.content|truncatechars:60 }}</p>
+          </a>
+          {% empty %}
+          <div class="list-group-item">No recent entries</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include the necessary JavaScript for the tabs -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the tabs
+    $('#entryTabs a').on('click', function (e) {
+      e.preventDefault();
+      $(this).tab('show');
+    });
+    
+    // Animate progress bars when the evaluation tab becomes visible
+    $('#evaluation-tab').on('shown.bs.tab', function (e) {
+      // First reset all progress bars to 0
+      $('.progress-bar').css('width', '0%');
+      
+      // Delay the animation slightly for a better effect
+      setTimeout(function() {
+        $('.progress-bar').each(function() {
+          const width = $(this).attr('aria-valuenow') + '%';
+          $(this).animate({width: width}, 1000);
+        });
+      }, 200);
+      
+      // Add entrance animation for metric items
+      $('.metric-item, .summary-item').each(function(index) {
+        $(this).css({
+          'opacity': 0,
+          'transform': 'translateY(20px)'
+        });
+        
+        setTimeout(() => {
+          $(this).animate({
+            'opacity': 1
+          }, 300);
+          $(this).css('transform', 'translateY(0)');
+        }, 100 * index);
+      });
+    });
+    
+    // Add tooltips to metrics
+    $('.metric-label').each(function() {
+      const metricName = $(this).text();
+      let description = '';
+      
+      // Add descriptions for common metrics
+      switch(metricName.toLowerCase()) {
+        case 'grammar':
+          description = 'Measures the grammatical correctness of your writing';
+          break;
+        case 'clarity':
+          description = 'How clear and understandable your writing is';
+          break;
+        case 'coherence':
+          description = 'How well your ideas flow and connect together';
+          break;
+        case 'vocabulary':
+          description = 'The range and appropriateness of your word choices';
+          break;
+        case 'overall':
+          description = 'The overall quality score of your writing';
+          break;
+        case 'improvement':
+          description = 'The degree of improvement from the original to the polished version';
+          break;
+      }
+      
+      if (description) {
+        $(this).attr('title', description);
+        $(this).css('cursor', 'help');
+      }
+    });
+  });
+</script>
+{% endblock content %}

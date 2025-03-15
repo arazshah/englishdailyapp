@@ -1,0 +1,14 @@
+{
+    "polished_text": "These changes will significantly enhance the evaluation section with a new summary card, better color categorization, and improved visual hierarchy. The summary card provides a quick overview of the key metrics, while the color-coded sections make it easier to navigate the different types of evaluation data. The animations and tooltips add an extra layer of interactivity and engagement.",
+    "evaluation": "Error: model gpt-4 does not exists or you don't have access to it, for more information check https://chat.avalai.ir/platform/limits",
+    "topic": "Error",
+    "metrics": {
+        "grammar": 0,
+        "clarity": 0,
+        "coherence": 0,
+        "vocabulary": 0,
+        "overall": 0,
+        "improvement": 0
+    },
+    "diff_html": "<p>Error generating diff.</p>"
+}

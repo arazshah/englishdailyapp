@@ -1,0 +1,39 @@
+{% extends "journal/base.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Your Markdown Files</h2>
+        
+        {% if markdown_files %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Size</th>
+                            <th>Last Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in markdown_files %}
+                            <tr>
+                                <td>{{ file.name }}</td>
+                                <td>{{ file.size }}</td>
+                                <td>{{ file.modified|date:"F d, Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'download-markdown-file' %}?path={{ file.path|urlencode }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p>You don't have any markdown files yet. Polish some journal entries to create markdown files.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %} 

@@ -1,0 +1,34 @@
+{
+  "entry_id": 19,
+  "timestamp": "2025-03-15T16:02:50.059689",
+  "original_content": "any time i need to learn more things or my all time spend to learn but i really  need time to can handle my ideas and transform to project.",
+  "polished_content": "This is a polished version of: any time i need to learn more things or my all time spend to learn but i really  need time to can handle my ideas and transform to project.",
+  "topic": "Sample Topic",
+  "evaluation": {
+    "full_text": "This is a sample evaluation. In the future, focus on improving grammar and clarity.",
+    "sections": {}
+  },
+  "diff_html": "<span class=\"added\">any time i need to learn more things or my all time spend to learn but i really  need time to can handle my ideas and transform to project.</span>",
+  "metrics": {
+    "text_statistics": {
+      "original_words": 100,
+      "polished_words": 110,
+      "word_count_diff": 10,
+      "original_sentences": 5,
+      "polished_sentences": 6,
+      "sentence_count_diff": 1
+    },
+    "quality_metrics": {
+      "avg_sentence_length_original": 20.0,
+      "avg_sentence_length_polished": 18.3,
+      "vocabulary_richness_original": 70.0,
+      "vocabulary_richness_polished": 75.0
+    },
+    "change_analysis": {
+      "added_lines": 2,
+      "removed_lines": 1,
+      "unchanged_lines": 3,
+      "change_percentage": 50.0
+    }
+  }
+}

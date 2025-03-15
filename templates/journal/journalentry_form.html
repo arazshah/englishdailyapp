@@ -1,30 +1,119 @@
-{% extends "journal/base.html" %} {% load static %} {% block content %}
-<div class="container mt-4">
-  <h1>Create a New Journal Entry</h1>
-  <form method="POST" action="{% url 'journal-create' %}">
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="title">Title</label>
-      <input
-        type="text"
-        class="form-control"
-        id="title"
-        name="title"
-        required
-      />
+{% extends "journal/base.html" %} {% load static %} {% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'journal/css/journalentry_form.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <!-- Page Header -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+    <a href="{% url 'journal-home' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+      <i class="fas fa-arrow-left fa-sm text-white-50 mr-1"></i> Back to Entries
+    </a>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        {% if is_update %}Update Entry{% else %}New Entry{% endif %}
+      </h6>
     </div>
-    <div class="form-group">
-      <label for="content">Content</label>
-      <textarea
-        class="form-control"
-        id="content"
-        name="content"
-        rows="5"
-        required
-      ></textarea>
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_title">Title</label>
+          <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required>
+        </div>
+        <div class="form-group">
+          <label for="id_content">Content</label>
+          <textarea name="content" id="id_content" class="form-control" rows="12" required>{{ form.content.value|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="id_tags">Tags</label>
+          <select name="tags" id="id_tags" class="form-control select2-tags" multiple>
+            {% for tag in available_tags %}
+              <option value="{{ tag.id }}" {% if tag.id in existing_tags %}selected{% endif %}>{{ tag.name }}</option>
+            {% endfor %}
+          </select>
+          <small class="form-text text-muted">Select existing tags or type to create new ones</small>
+        </div>
+        <div class="form-group mt-4">
+          <button type="submit" class="btn btn-primary">
+            {% if is_update %}Update{% else %}Create{% endif %}
+          </button>
+          <a href="{% url 'journal-home' %}" class="btn btn-secondary ml-2">Cancel</a>
+        </div>
+      </form>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a href="{% url 'journal-entries' %}" class="btn btn-secondary">Cancel</a>
-  </form>
+  </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.select2-tags').select2({
+      tags: true,
+      placeholder: "Select or create tags",
+      allowClear: true,
+      tokenSeparators: [',', ' '],
+      createTag: function (params) {
+        var term = $.trim(params.term);
+        
+        if (term === '') {
+          return null;
+        }
+        
+        return {
+          id: 'new:' + term,
+          text: term + ' (new)',
+          newTag: true
+        }
+      }
+    });
+    
+    // Handle form submission with new tags
+    $('form').on('submit', function(e) {
+      var newTags = [];
+      $('.select2-tags option:selected').each(function() {
+        var value = $(this).val();
+        if (value && value.startsWith('new:')) {
+          e.preventDefault();
+          newTags.push(value.substring(4));
+        }
+      });
+      
+      if (newTags.length > 0) {
+        // Create new tags via AJAX
+        $.ajax({
+          url: "{% url 'create-tags' %}",
+          type: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          data: {
+            'tags': newTags.join(','),
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+          },
+          success: function(response) {
+            // Replace new tag options with created tag IDs
+            for (var i = 0; i < response.tags.length; i++) {
+              var tag = response.tags[i];
+              var newOption = new Option(tag.name, tag.id, true, true);
+              $('.select2-tags option[value="new:' + tag.name + '"]').replaceWith(newOption);
+            }
+            // Resubmit the form
+            $('form').off('submit').submit();
+          },
+          error: function(xhr, status, error) {
+            console.error("Error creating tags:", error);
+            // Submit the form anyway to avoid blocking the user
+            $('form').off('submit').submit();
+          }
+        });
+      }
+    });
+  });
+</script>
 {% endblock content %}

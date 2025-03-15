@@ -1,0 +1,123 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the evaluation content
+        const evaluationText = document.getElementById('evaluation-content').innerHTML;
+        
+        // Define the categories we want to extract
+        const categories = [
+            { name: 'Grammar and Syntax', icon: 'fas fa-spell-check' },
+            { name: 'Clarity and Conciseness', icon: 'fas fa-glasses' },
+            { name: 'Word Choice and Vocabulary', icon: 'fas fa-book' },
+            { name: 'Sentence Structure and Flow', icon: 'fas fa-stream' }
+        ];
+        
+        let formattedHTML = '';
+        let strengths = [];
+        let improvements = [];
+        
+        // Try to extract each category from the evaluation text
+        categories.forEach(category => {
+            // Look for patterns like "1. Grammar and Syntax:" or "Grammar and Syntax:"
+            const regex = new RegExp(`(?:\\d+\\.\\s+)?${category.name}[:\\s]+(.*?)(?=(?:\\d+\\.\\s+)?[A-Z][a-z]+\\s+[a-z]+\\s+[A-Z][a-z]+:|$)`, 's');
+            const match = evaluationText.match(regex);
+            
+            if (match && match[1]) {
+                const content = match[1].trim();
+                
+                // Extract strengths and improvements from this category
+                extractInsights(content, category.name, strengths, improvements);
+                
+                // Format examples with before/after highlighting
+                const formattedContent = content.replace(
+                    /Original:(.*?)Polished:(.*?)(?=Original:|$)/gs, 
+                    '<div class="example-comparison"><div class="example-original"><strong>Original:</strong>$1</div><div class="example-improved"><strong>Polished:</strong>$2</div></div>'
+                );
+                
+                formattedHTML += `
+                <div class="evaluation-category">
+                    <h4><i class="${category.icon} mr-2"></i> ${category.name}</h4>
+                    <div>${formattedContent}</div>
+                </div>`;
+            }
+        });
+        
+        // If we successfully parsed categories, replace the content
+        if (formattedHTML) {
+            document.getElementById('evaluation-content').innerHTML = formattedHTML;
+        }
+        
+        // Populate strengths and improvements lists
+        const strengthsList = document.getElementById('strengths-list');
+        const improvementsList = document.getElementById('improvements-list');
+        
+        if (strengthsList && improvementsList) {
+            strengths.slice(0, 5).forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+            
+            improvements.slice(0, 5).forEach(improvement => {
+                const li = document.createElement('li');
+                li.textContent = improvement;
+                improvementsList.appendChild(li);
+            });
+            
+            // If no strengths or improvements were found, add placeholders
+            if (strengths.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = "Good overall writing structure";
+                strengthsList.appendChild(li);
+            }
+            
+            if (improvements.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = "Continue practicing for more natural flow";
+                improvementsList.appendChild(li);
+            }
+        }
+    });
+    
+    // Function to extract insights from evaluation text
+    function extractInsights(text, category, strengths, improvements) {
+        // Look for improvement indicators
+        const improvementIndicators = [
+            'could be improved', 'should be', 'would benefit from', 
+            'needs', 'lacks', 'missing', 'incorrect', 'error', 
+            'problem', 'issue', 'awkward', 'unclear', 'confusing',
+            'repetitive', 'redundant', 'wordy'
+        ];
+        
+        // Look for strength indicators
+        const strengthIndicators = [
+            'improved by', 'enhanced', 'better', 'clearer',
+            'more concise', 'more precise', 'more effective',
+            'stronger', 'well-structured', 'good', 'excellent'
+        ];
+        
+        // Split into sentences
+        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        
+        sentences.forEach(sentence => {
+            sentence = sentence.trim();
+            
+            // Check if this sentence indicates an improvement area
+            if (improvementIndicators.some(indicator => sentence.toLowerCase().includes(indicator))) {
+                // Limit sentence length for display
+                if (sentence.length > 100) {
+                    sentence = sentence.substring(0, 100) + '...';
+                }
+                improvements.push(`${category}: ${sentence}`);
+            }
+            
+            // Check if this sentence indicates a strength
+            else if (strengthIndicators.some(indicator => sentence.toLowerCase().includes(indicator))) {
+                // Limit sentence length for display
+                if (sentence.length > 100) {
+                    sentence = sentence.substring(0, 100) + '...';
+                }
+                strengths.push(`${category}: ${sentence}`);
+            }
+        });
+    }
+</script> 

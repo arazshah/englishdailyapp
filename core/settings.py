@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
+    'crispy_bootstrap4',
     'journal.apps.JournalConfig',
     'users.apps.UsersConfig',
 ]
@@ -89,3 +91,7 @@ LOGIN_URL = 'login'
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL')
 OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4-turbo')
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"

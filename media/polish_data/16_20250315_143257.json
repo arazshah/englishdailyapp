@@ -1,0 +1,34 @@
+{
+  "entry_id": 16,
+  "timestamp": "2025-03-15T14:32:57.139652",
+  "original_content": "this is test to polish my text i try to improve my ability to programming for this action i should read any book related a coding and watch any tutorial videos for learn more i love coding.",
+  "polished_content": "This is a polished version of: this is test to polish my text i try to improve my ability to programming for this action i should read any book related a coding and watch any tutorial videos for learn more i love coding.",
+  "topic": "Sample Topic",
+  "evaluation": {
+    "full_text": "This is a sample evaluation. In the future, focus on improving grammar and clarity.",
+    "sections": {}
+  },
+  "diff_html": "<span class=\"added\">this is test to polish my text i try to improve my ability to programming for this action i should read any book related a coding and watch any tutorial videos for learn more i love coding.</span>",
+  "metrics": {
+    "text_statistics": {
+      "original_words": 100,
+      "polished_words": 110,
+      "word_count_diff": 10,
+      "original_sentences": 5,
+      "polished_sentences": 6,
+      "sentence_count_diff": 1
+    },
+    "quality_metrics": {
+      "avg_sentence_length_original": 20.0,
+      "avg_sentence_length_polished": 18.3,
+      "vocabulary_richness_original": 70.0,
+      "vocabulary_richness_polished": 75.0
+    },
+    "change_analysis": {
+      "added_lines": 2,
+      "removed_lines": 1,
+      "unchanged_lines": 3,
+      "change_percentage": 50.0
+    }
+  }
+}

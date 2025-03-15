@@ -1,0 +1,145 @@
+<!-- Metrics Section -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Writing Metrics</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="metrics-card">
+                    <h6><i class="fas fa-file-alt mr-2"></i> Text Statistics</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="metric-item">
+                                <span class="metric-label">Words:</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="metric-value">{{ metrics.original_words }}</span>
+                                    <span class="metric-arrow">→</span>
+                                    <span class="metric-value">{{ metrics.polished_words }}</span>
+                                    {% if metrics.word_count_diff > 0 %}
+                                        <span class="metric-change positive">+{{ metrics.word_count_diff }}</span>
+                                    {% elif metrics.word_count_diff < 0 %}
+                                        <span class="metric-change negative">{{ metrics.word_count_diff }}</span>
+                                    {% else %}
+                                        <span class="metric-change neutral">0</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Other metrics... -->
+                    </div>
+                </div>
+            </div>
+            <!-- More metrics... -->
+        </div>
+        
+        <!-- Change analysis... -->
+    </div>
+</div>
+
+<!-- Side-by-side comparison... -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5>Original</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ object.content }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5>Polished</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ polished_content }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Diff view... -->
+<div class="card mt-3">
+    <div class="card-header bg-light">
+        <h5>Changes Highlighted</h5>
+    </div>
+    <div class="card-body">
+        <p>{{ diff_html|safe }}</p>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h4>Text Statistics</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Word Count</h5>
+                <p>Original: {{ metrics.text_statistics.original_words }}</p>
+                <p>Polished: {{ metrics.text_statistics.polished_words }}</p>
+                <p>Difference: {{ metrics.text_statistics.word_count_diff }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Sentence Count</h5>
+                <p>Original: {{ metrics.text_statistics.original_sentences }}</p>
+                <p>Polished: {{ metrics.text_statistics.polished_sentences }}</p>
+                <p>Difference: {{ metrics.text_statistics.sentence_count_diff }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h4>Quality Metrics</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Average Sentence Length</h5>
+                <p>Original: {{ metrics.quality_metrics.avg_sentence_length_original }}</p>
+                <p>Polished: {{ metrics.quality_metrics.avg_sentence_length_polished }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Vocabulary Richness</h5>
+                <p>Original: {{ metrics.quality_metrics.vocabulary_richness_original }}%</p>
+                <p>Polished: {{ metrics.quality_metrics.vocabulary_richness_polished }}%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h4>Change Analysis</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Line Changes</h5>
+                <p>Added: {{ metrics.change_analysis.added_lines }}</p>
+                <p>Removed: {{ metrics.change_analysis.removed_lines }}</p>
+                <p>Unchanged: {{ metrics.change_analysis.unchanged_lines }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Overall Change</h5>
+                <p>Change Percentage: {{ metrics.change_analysis.change_percentage }}%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4>Changes Highlighted</h4>
+    </div>
+    <div class="card-body">
+        <div class="diff-container">
+            {{ diff_html|safe }}
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,308 @@
+{% extends "journal/base.html" %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'journal/css/analytics.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+  <!-- Page Header -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Journal Analytics Dashboard</h1>
+    <a href="{% url 'export-pdf' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+      <i class="fas fa-download fa-sm text-white-50 mr-1"></i> Generate Report
+    </a>
+  </div>
+
+  <!-- Stats Cards Row -->
+  <div class="row">
+    <!-- Total Entries Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Entries</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_entries }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-book fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Polished Entries Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Polished Entries</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ polished_entries }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-magic fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Average Words Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Average Words</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ avg_words }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-pen fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Streak Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Current Streak</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ streak }} days</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-fire fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row">
+    <!-- Activity Chart -->
+    <div class="col-xl-8 col-lg-7">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary">Writing Activity (Last 30 Days)</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-area">
+            <canvas id="activityChart" height="320"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Topic Distribution -->
+    <div class="col-xl-4 col-lg-5">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary">Topic Distribution</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-pie pt-4 pb-2">
+            <canvas id="topicChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="row">
+    <!-- Tags Chart -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Top Tags</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-bar">
+            <canvas id="tagsChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Writing Improvement -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Writing Improvement</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-bar">
+            <canvas id="improvementChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Activity Chart
+    var activityCtx = document.getElementById('activityChart').getContext('2d');
+    var activityChart = new Chart(activityCtx, {
+      type: 'line',
+      data: {
+        labels: {{ activity_dates|safe }},
+        datasets: [{
+          label: 'Entries',
+          lineTension: 0.3,
+          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          borderColor: "rgba(78, 115, 223, 1)",
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointBorderColor: "rgba(78, 115, 223, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          data: {{ activity_counts|safe }}
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: {
+              display: false,
+              drawBorder: false
+            },
+            ticks: {
+              maxTicksLimit: 7
+            }
+          },
+          y: {
+            ticks: {
+              maxTicksLimit: 5,
+              padding: 10,
+              precision: 0
+            },
+            grid: {
+              color: "rgb(234, 236, 244)",
+              zeroLineColor: "rgb(234, 236, 244)",
+              drawBorder: false,
+              borderDash: [2],
+              zeroLineBorderDash: [2]
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyColor: "#858796",
+            titleMarginBottom: 10,
+            titleColor: '#6e707e',
+            titleFontSize: 14,
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            intersect: false,
+            mode: 'index',
+            caretPadding: 10
+          }
+        }
+      }
+    });
+
+    // Tags Chart
+    var tagsCtx = document.getElementById('tagsChart').getContext('2d');
+    var tagsChart = new Chart(tagsCtx, {
+      type: 'bar',
+      data: {
+        labels: {{ tag_names|safe }},
+        datasets: [{
+          label: 'Entries',
+          backgroundColor: "#4e73df",
+          hoverBackgroundColor: "#2e59d9",
+          borderColor: "#4e73df",
+          data: {{ tag_counts|safe }}
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            ticks: {
+              precision: 0
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+
+    // Topic Chart
+    var topicCtx = document.getElementById('topicChart').getContext('2d');
+    var topicChart = new Chart(topicCtx, {
+      type: 'doughnut',
+      data: {
+        labels: {{ topic_names|safe }},
+        datasets: [{
+          data: {{ topic_counts|safe }},
+          backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+          hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617'],
+          hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          }
+        },
+        cutout: '70%'
+      }
+    });
+
+    // Writing Improvement Chart
+    var improvementCtx = document.getElementById('improvementChart').getContext('2d');
+    var improvementChart = new Chart(improvementCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Grammar', 'Clarity', 'Vocabulary', 'Flow'],
+        datasets: [{
+          label: 'Before',
+          backgroundColor: 'rgba(78, 115, 223, 0.7)',
+          data: [65, 70, 60, 75]
+        }, {
+          label: 'After',
+          backgroundColor: 'rgba(28, 200, 138, 0.7)',
+          data: [85, 90, 80, 88]
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock content %} 
