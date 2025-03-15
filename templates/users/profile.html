@@ -70,7 +70,7 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{% url 'password_change' %}">
+                    <form method="POST" action="{% url 'users:password_change' %}">
                         {% csrf_token %}
                         <fieldset class="form-group">
                             <legend class="border-bottom mb-4">Password Security</legend>
@@ -148,7 +148,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="POST" action="{% url 'upload_profile_image' %}" enctype="multipart/form-data" id="imageUploadForm">
+            <form method="POST" action="{% url 'users:upload_profile_image' %}" enctype="multipart/form-data" id="imageUploadForm">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="form-group">
@@ -202,7 +202,7 @@
             const themePreference = document.getElementById('themePreference').value;
             
             // Send AJAX request to save settings
-            fetch('{% url "save_settings" %}', {
+            fetch('{% url "users:save_settings" %}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -84,8 +84,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login redirect
-LOGIN_REDIRECT_URL = 'journal-home'
-LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'users:profile'
+LOGIN_URL = 'users:login'
 
 # OpenAI settings
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

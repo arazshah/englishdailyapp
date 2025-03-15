@@ -218,7 +218,7 @@
                                     Toggle Theme
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                <a class="dropdown-item" href="{% url 'users:logout' %}">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -226,13 +226,13 @@
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
+                            <a class="nav-link" href="{% url 'users:login' %}">
                                 <i class="fas fa-sign-in-alt fa-sm fa-fw mr-1"></i>
                                 Login
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">
+                            <a class="nav-link" href="{% url 'users:register' %}">
                                 <i class="fas fa-user-plus fa-sm fa-fw mr-1"></i>
                                 Register
                             </a>
